@@ -4,6 +4,7 @@ from . import views
 
 
 urlpatterns = [
-    re_path(r'^$', views.index, name='index'),
-    path('data', views.data, name='data'),
+    re_path(r'^$', views.index),
+    path('data_summary/', views.data_summary),
+    path('data/<str:filename>', views.data)
 ]

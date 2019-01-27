@@ -6,9 +6,17 @@ import numpy as np
 from glob import glob
 import os
 from datetime import datetime
+import json
+import csv
 
 
-# Create your views here.
+TRANSFORM = {
+    'identity': lambda x: x,
+    'log': lambda x: np.log(x),
+    'custom': lambda x: np.sin(x)*np.sqrt(x),
+}
+
+
 def index(request):
     template = loader.get_template('monitor/index.html')
     context = {
@@ -17,8 +25,8 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 
-def data(request):
-    data_files = glob('%s/*.txt' % settings.DATA_PATH)
+def data_summary(request):
+    data_files = glob('%s/*.txt' % settings.DATA_DIR)
     data_items = []
     for data_file in data_files:
         basename = os.path.basename(data_file)
@@ -32,3 +40,16 @@ def data(request):
             'update_time': update_time,
         })
     return JsonResponse(data_items, safe=False)
+
+
+def data(request, filename):
+    transform = request.GET['transform']
+    filepath = os.path.join(settings.DATA_DIR, filename)
+    data = np.loadtxt(filepath)
+    data[:, 1] = np.array(TRANSFORM[transform](data[:, 1]))
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+    writer = csv.writer(response)
+    for i in range(len(data)):
+        writer.writerow(data[i])
+    return response
