@@ -47,9 +47,4 @@ def data(request, filename):
     filepath = os.path.join(settings.DATA_DIR, filename)
     data = np.loadtxt(filepath)
     data[:, 1] = np.array(TRANSFORM[transform](data[:, 1]))
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
-    writer = csv.writer(response)
-    for i in range(len(data)):
-        writer.writerow(data[i])
-    return response
+    return HttpResponse(json.dumps(data.tolist()), content_type='application/json')

@@ -126,13 +126,10 @@
               if(this.items[i]._plot == true) {
                 item = this.items[i];
                 rv = await axios.get('http://' + "{{ HOST }}" + "/monitor/data/" + item.filename + "?transform=" + this.selected)
-                data = Papa.parse(rv.data).data
-                data = data.slice(0, data.length-1)
-                data = data.map(x => [+x[0], +x[1]])
                 series.push({
                   name: item.filename,
                   type: 'line',
-                  data: data
+                  data: rv.data
                 })
                 option.legend.data.push(item.filename)
               }
